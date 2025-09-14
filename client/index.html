@@ -3,17 +3,73 @@
 <head>
     <title>生存游戏</title>
     <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
         #game-container {
-            margin: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        #game-area {
+            flex: 0 0 auto;
         }
         canvas {
-            border: 1px solid #ccc;
+            border: 2px solid #333;
+            cursor: crosshair;
+        }
+        #info-panel {
+            flex: 0 0 300px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        #info-panel h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .object-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .object-info h3 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        .object-info p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        .no-selection {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+        <div id="game-area">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+        <div id="info-panel">
+            <h2>物体信息</h2>
+            <div id="object-info">
+                <div class="no-selection">点击地图上的物体查看详细信息</div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
