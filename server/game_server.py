@@ -18,14 +18,15 @@ TREE_COUNT = 20  # 树的数量
 STONE_COUNT = 15  # 石头的数量
 OBSTACLE_COUNT = 10  # 不可行tiles的数量
 game_map = []
-game_objects = []  # 存储所有游戏对象
-player = None
+game_objects = []  # 存储所有游戏对象（包括玩家）
+next_object_id = 1  # 下一个可用的对象ID
 
 def init_map():
-    global game_map, game_objects, player
+    global game_map, game_objects, next_object_id
     # 初始化空白地图
     game_map = [[0 for _ in range(MAP_WIDTH)] for _ in range(MAP_HEIGHT)]
     game_objects = []
+    next_object_id = 1  # 重置ID计数器
     
     # 随机设置不可行tiles
     for _ in range(OBSTACLE_COUNT):
@@ -39,8 +40,9 @@ def init_map():
         x = random.randint(0, MAP_WIDTH-1)
         y = random.randint(0, MAP_HEIGHT-1)
         if game_map[y][x] == 0:  # 只在空白位置放置树
-            tree = Tree(x, y)
+            tree = Tree(x, y, next_object_id)
             game_objects.append(tree)
+            next_object_id += 1
             tree_count += 1
     
     # 随机放置石头
@@ -49,8 +51,9 @@ def init_map():
         x = random.randint(0, MAP_WIDTH-1)
         y = random.randint(0, MAP_HEIGHT-1)
         if game_map[y][x] == 0:  # 只在空白位置放置石头
-            stone = Stone(x, y)
+            stone = Stone(x, y, next_object_id)
             game_objects.append(stone)
+            next_object_id += 1
             stone_count += 1
     
     # 随机放置玩家
@@ -58,8 +61,17 @@ def init_map():
         x = random.randint(0, MAP_WIDTH-1)
         y = random.randint(0, MAP_HEIGHT-1)
         if game_map[y][x] == 0:
-            player = Player(x, y)
+            player = Player(x, y, next_object_id)
+            game_objects.append(player)
+            next_object_id += 1
             break
+
+def get_player():
+    """获取玩家对象"""
+    for obj in game_objects:
+        if obj.type == 'player':
+            return obj
+    return None
 
 def get_valid_moves(pos):
     moves = []
@@ -74,21 +86,18 @@ def get_valid_moves(pos):
 
 def game_loop():
     while True:
-        # 获取可能的移动方向
-        valid_moves = get_valid_moves(player.get_position())
-        if valid_moves:
-            # 随机选择一个有效移动
-            new_x, new_y = random.choice(valid_moves)
-            # 更新地图
-            old_x, old_y = player.get_position()
-            game_map[old_y][old_x] = 0
-            game_map[new_y][new_x] = 1
-            player.set_position(new_x, new_y)
+        player = get_player()
+        if player:
+            # 获取可能的移动方向
+            valid_moves = get_valid_moves(player.get_position())
+            if valid_moves:
+                # 随机选择一个有效移动
+                new_x, new_y = random.choice(valid_moves)
+                player.set_position(new_x, new_y)
         
         # 发送游戏状态给所有客户端
         socketio.emit('game_state', {
             'map': game_map,
-            'player': player.to_dict(),
             'objects': [obj.to_dict() for obj in game_objects]
         })
         
@@ -107,7 +116,6 @@ def handle_connect():
     print('Client connected')
     socketio.emit('game_state', {
         'map': game_map,
-        'player': player.to_dict(),
         'objects': [obj.to_dict() for obj in game_objects]
     })
 

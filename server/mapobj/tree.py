@@ -3,8 +3,8 @@ from .base import GameObject
 class Tree(GameObject):
     """树类"""
     
-    def __init__(self, x: int, y: int):
-        super().__init__(x, y)
+    def __init__(self, x: int, y: int, obj_id: int = None):
+        super().__init__(x, y, obj_id)
         self.emoji = "🌳"
         self.type = "tree"
     
